@@ -1,0 +1,19 @@
+# Node modules
+/frontend/node_modules/
+
+# Laravel vendor
+/backend/vendor/
+
+# Env files
+/frontend/.env
+/backend/.env
+
+# Build files
+/frontend/build/
+/frontend/dist/
+
+# IDE & OS files
+*.log
+*.idea/
+*.vscode/
+.DS_Store
