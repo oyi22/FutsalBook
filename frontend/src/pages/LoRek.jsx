@@ -63,17 +63,13 @@ export default function AuthForm() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Animated Background Effects */}
       <div className="absolute inset-0 overflow-hidden">
         <div className={`absolute -top-1/2 -right-1/2 w-96 h-96 bg-gradient-to-br from-emerald-300/20 to-teal-300/20 rounded-full blur-3xl transition-all duration-1000 ease-out ${isLogin ? 'scale-100' : 'scale-125 translate-x-32 -translate-y-16'}`} />
         <div className={`absolute -bottom-1/2 -left-1/2 w-96 h-96 bg-gradient-to-tr from-teal-300/20 to-cyan-300/20 rounded-full blur-3xl transition-all duration-1000 ease-out ${isLogin ? 'scale-100' : 'scale-125 -translate-x-32 translate-y-16'}`} />
         <div className={`absolute top-1/4 left-1/4 w-32 h-32 bg-emerald-400/10 rounded-full blur-2xl transition-all duration-700 ${isLogin ? 'opacity-100' : 'opacity-50 scale-150'}`} />
       </div>
 
-      {/* Main Card with better shadow */}
       <div className="relative w-full max-w-4xl flex rounded-3xl overflow-hidden shadow-2xl bg-white/90 backdrop-blur-xl border border-white/30 transform transition-all duration-300 hover:shadow-3xl">
-        
-        {/* Enhanced Sliding Panel */}
         <div className={`absolute top-0 w-1/2 h-full z-20 transition-all duration-700 ease-in-out transform ${isLogin ? 'translate-x-full' : 'translate-x-0'} ${isLogin ? 'bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-600' : 'bg-gradient-to-br from-teal-600 via-teal-500 to-emerald-600'} flex items-center justify-center text-white`}>
           <div className={`text-center px-8 transform transition-all duration-500 ${isLogin ? 'translate-x-0' : 'translate-x-0'}`}>
             {isLogin ? (
@@ -104,7 +100,7 @@ export default function AuthForm() {
           </div>
         </div>
 
-        {/* Login Form with smooth transitions */}
+        
         <div className={`w-1/2 p-8 flex items-center justify-center transition-all duration-500 ${isLogin ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'}`}>
           {isLogin && (
             <div className="w-full max-w-sm animate-in fade-in-0 slide-in-from-bottom-4 duration-700">
@@ -196,7 +192,6 @@ export default function AuthForm() {
           )}
         </div>
 
-        {/* Register Form with smooth transitions */}
         <div className={`w-1/2 p-8 flex items-center justify-center transition-all duration-500 ${!isLogin ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>
           {!isLogin && (
             <div className="w-full max-w-sm animate-in fade-in-0 slide-in-from-bottom-4 duration-700">
