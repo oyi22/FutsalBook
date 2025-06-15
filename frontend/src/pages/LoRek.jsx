@@ -64,12 +64,19 @@ export default function AuthForm() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 flex items-center justify-center p-4 relative overflow-hidden">
       <div className="absolute inset-0 overflow-hidden">
-        <div className={`absolute -top-1/2 -right-1/2 w-96 h-96 bg-gradient-to-br from-emerald-300/20 to-teal-300/20 rounded-full blur-3xl transition-all duration-1000 ease-out ${isLogin ? 'scale-100' : 'scale-125 translate-x-32 -translate-y-16'}`} />
-        <div className={`absolute -bottom-1/2 -left-1/2 w-96 h-96 bg-gradient-to-tr from-teal-300/20 to-cyan-300/20 rounded-full blur-3xl transition-all duration-1000 ease-out ${isLogin ? 'scale-100' : 'scale-125 -translate-x-32 translate-y-16'}`} />
-        <div className={`absolute top-1/4 left-1/4 w-32 h-32 bg-emerald-400/10 rounded-full blur-2xl transition-all duration-700 ${isLogin ? 'opacity-100' : 'opacity-50 scale-150'}`} />
+        <div className={`absolute -top-1/2 -right-1/2 w-96 h-96 bg-gradient-to-br from-emerald-300/30 to-teal-300/30 rounded-full blur-3xl transition-all duration-1000 ease-out ${isLogin ? 'scale-100 rotate-0' : 'scale-125 translate-x-32 -translate-y-16 rotate-45'}`} />
+        <div className={`absolute -bottom-1/2 -left-1/2 w-96 h-96 bg-gradient-to-tr from-teal-300/30 to-cyan-300/30 rounded-full blur-3xl transition-all duration-1000 ease-out ${isLogin ? 'scale-100 rotate-0' : 'scale-125 -translate-x-32 translate-y-16 rotate-45'}`} />
+        <div className={`absolute top-1/4 left-1/4 w-32 h-32 bg-emerald-400/10 rounded-full blur-2xl transition-all duration-700 ${isLogin ? 'opacity-100 scale-100' : 'opacity-60 scale-150'}`} />
+        <div className={`absolute buttom-1/4 left-1/4 w-24 h-24 bg-emerald-400/10 rounded-full blur-2xl transition-all duration-900 ${isLogin ? 'opacity-100 scale-100' : 'opacity-100 scale-125'}`} />
+        {/*flt partikel*/}
+        <div className={`absolute top-20 left-20 w-2 h-2 bg-emerald-400/40 rounded-full animate-pulse`} />
+        <div className={`absolute top-40 left-32 w-1 h-1 bg-teal-400/60 rounded-full animate-bounce`} />
+        <div className={`absolute bottom-32 left-40 w-3 h-3 bg-cyan-400/30 rounded-full animate-pulse`} />
       </div>
 
-      <div className="relative w-full max-w-4xl flex rounded-3xl overflow-hidden shadow-2xl bg-white/90 backdrop-blur-xl border border-white/30 transform transition-all duration-300 hover:shadow-3xl">
+      {/*main con*/}
+      <div className="relative w-full max-w-5xl flex rounded-3xl overflow-hidden shadow-2xl bg-white/95 backdrop-blur-xl border border-white/50 transform transition-all duration-500 hover:shadow-3xl hover:scale-[1.02] hover:border-emerald-200/50">
+      {/*slide panel*/}
         <div className={`absolute top-0 w-1/2 h-full z-20 transition-all duration-700 ease-in-out transform ${isLogin ? 'translate-x-full' : 'translate-x-0'} ${isLogin ? 'bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-600' : 'bg-gradient-to-br from-teal-600 via-teal-500 to-emerald-600'} flex items-center justify-center text-white`}>
           <div className={`text-center px-8 transform transition-all duration-500 ${isLogin ? 'translate-x-0' : 'translate-x-0'}`}>
             {isLogin ? (
