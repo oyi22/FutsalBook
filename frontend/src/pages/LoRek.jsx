@@ -203,11 +203,6 @@ export default function AuthForm() {
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-gray-800 mb-2">Login</h3>
                 <p className="text-gray-600">Selamat datang kembali di FutsalBook</p>
-                <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200 transform transition-all duration-300 hover:scale-105">
-                  <p className="text-xs text-blue-800 font-medium">Demo Login:</p>
-                  <p className="text-xs text-blue-700">Email: rpl@gmail.com</p>
-                  <p className="text-xs text-blue-700">Password: rplHORE</p>
-                </div>
               </div>
 
               {error && (
