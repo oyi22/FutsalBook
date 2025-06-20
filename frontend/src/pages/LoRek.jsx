@@ -1,13 +1,56 @@
 import React, { useState } from "react"
+import { useNavigate } from "react-router-dom";
 import { FiMail, FiLock, FiEye, FiEyeOff, FiUser, FiArrowRight, FiUserPlus, FiPhone, FiCheckCircle, FiAlertCircle } from "react-icons/fi"
 
-const DUMMY_USER = { email: "rpl@gmail.com", password: "rplHORE" }
+// Base API URL
+const API_URL = 'http://localhost:8000/api';
+
+// Register function
+const register = async (userData) => {
+  try {
+    const response = await fetch(`${API_URL}/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        name: userData.name,
+        email: userData.email,
+        password: userData.password,
+      }),
+    });
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    throw new Error('Network error occurred');
+  }
+};
+
+// Login function
+const login = async (email, password) => {
+  try {
+    const response = await fetch(`${API_URL}/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    throw new Error('Network error occurred');
+  }  
+};
 
 const REGISTER_FIELDS = [
   { type: "text", placeholder: "Masukkan nama", icon: FiUser, name: "fullName", label: "Nama" },
   { type: "email", placeholder: "Masukkan Email", icon: FiMail, name: "email", label: "Email" },
   { type: "password", placeholder: "Buat Password", icon: FiLock, name: "password", label: "Password", hasToggle: true },
-  { type: "tel", placeholder: "No Hp", icon: FiPhone, name: "phone", label: "No Hp" }
 ]
 
 export default function AuthForm() {
@@ -16,7 +59,9 @@ export default function AuthForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
-  const [formData, setFormData] = useState({ email: "", password: "", fullName: "", phone: "" })
+  const [formData, setFormData] = useState({ email: "", password: "", fullName: ""})
+
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -24,33 +69,74 @@ export default function AuthForm() {
     if (error) setError("")
   }
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     setIsLoading(true)
     setError("")
-    setTimeout(() => {
-      if (formData.email === DUMMY_USER.email && formData.password === DUMMY_USER.password) {
-        setSuccess("Login berhasil! Mengarahkan ke halaman utama...")
-        setTimeout(() => window.location.href = "/home", 1000)
+    
+    try {
+      const result = await login(formData.email, formData.password) 
+      
+      if (!result.success) {
+        // Handle errors dari backend
+        if (result.errors) {
+          const errorMessages = Object.values(result.errors).flat().join(', ')
+          setError(errorMessages)
+        } else {
+          setError(result.message || "Login gagal!")
+        }
       } else {
-        setError("Email atau password salah!")
+        // Store user data and token
+        localStorage.setItem('token', result.token);
+        localStorage.setItem('user', JSON.stringify(result.user));
+        
+        setSuccess("Login berhasil! Mengarahkan ke dashboard...")
+        // redirect ke dashboard instead of /home
+        setTimeout(() => navigate("/user-dashboard"), 1500)
       }
-      setIsLoading(false)
-    }, 1000)
+    } catch (err) {
+      setError("Terjadi kesalahan saat login!")
+    }
+    
+    setIsLoading(false)
   }
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     setIsLoading(true)
     setError("")
-    setTimeout(() => {
-      if (formData.email && formData.password && formData.fullName && formData.phone) {
-        setSuccess("Registrasi berhasil! Silakan login dengan akun Anda.")
-        setIsLogin(true)
-        setFormData({ email: "", password: "", fullName: "", phone: "" })
-      } else {
-        setError("Mohon lengkapi semua field!")
+    
+    if (formData.email && formData.password && formData.fullName ) {
+      try {
+        const result = await register({
+          name: formData.fullName,
+          email: formData.email,
+          password: formData.password,
+        })
+        
+        if (!result.success) {
+          // Handle validasi errors
+          if (result.errors) {
+            const errorMessages = Object.values(result.errors).flat().join(', ')
+            setError(errorMessages)
+          } else {
+            setError(result.message || "Registrasi gagal!")
+          }
+        } else {
+          setSuccess("Registrasi berhasil! Silakan login dengan akun Anda.")
+          // Reset form danswitch ke login
+          setTimeout(() => {
+            setIsLogin(true)
+            setFormData({ email: formData.email, password: "", fullName: ""})
+            setSuccess("")
+          }, 2000) 
+        }
+      } catch (err) {
+        setError("Terjadi kesalahan saat registrasi!")
       }
-      setIsLoading(false)
-    }, 1000)
+    } else {
+      setError("Mohon lengkapi semua field!")
+    }
+    
+    setIsLoading(false)
   }
 
   const toggleMode = () => {
@@ -58,7 +144,7 @@ export default function AuthForm() {
     setShowPassword(false)
     setError("")
     setSuccess("")
-    setFormData({ email: "", password: "", fullName: "", phone: "" })
+    setFormData({ email: "", password: "", fullName: "" })
   }
 
   return (
@@ -67,20 +153,20 @@ export default function AuthForm() {
         <div className={`absolute -top-1/2 -right-1/2 w-96 h-96 bg-gradient-to-br from-emerald-300/30 to-teal-300/30 rounded-full blur-3xl transition-all duration-1000 ease-out ${isLogin ? 'scale-100 rotate-0' : 'scale-125 translate-x-32 -translate-y-16 rotate-45'}`} />
         <div className={`absolute -bottom-1/2 -left-1/2 w-96 h-96 bg-gradient-to-tr from-teal-300/30 to-cyan-300/30 rounded-full blur-3xl transition-all duration-1000 ease-out ${isLogin ? 'scale-100 rotate-0' : 'scale-125 -translate-x-32 translate-y-16 rotate-45'}`} />
         <div className={`absolute top-1/4 left-1/4 w-32 h-32 bg-emerald-400/10 rounded-full blur-2xl transition-all duration-700 ${isLogin ? 'opacity-100 scale-100' : 'opacity-60 scale-150'}`} />
-        <div className={`absolute buttom-1/4 left-1/4 w-24 h-24 bg-emerald-400/10 rounded-full blur-2xl transition-all duration-900 ${isLogin ? 'opacity-100 scale-100' : 'opacity-100 scale-125'}`} />
-        {/*flt partikel*/}
+        <div className={`absolute bottom-1/4 left-1/4 w-24 h-24 bg-emerald-400/10 rounded-full blur-2xl transition-all duration-900 ${isLogin ? 'opacity-100 scale-100' : 'opacity-100 scale-125'}`} />
+        {/*floating particles*/}
         <div className={`absolute top-20 left-20 w-2 h-2 bg-emerald-400/40 rounded-full animate-pulse`} />
         <div className={`absolute top-40 left-32 w-1 h-1 bg-teal-400/60 rounded-full animate-bounce`} />
         <div className={`absolute bottom-32 left-40 w-3 h-3 bg-cyan-400/30 rounded-full animate-pulse`} />
       </div>
 
-      {/*main con*/}
-      <div className="relative w-full max-w-5xl flex rounded-3xl overflow-hidden shadow-2xl bg-white/95 backdrop-blur-xl border border-white/50 transform transition-all duration-500 hover:shadow-3xl hover:scale-[1.02] hover:border-emerald-200/50">
-      {/*slide panel*/}
+      {/*main container*/}
+      <div className="relative w-full max-w-5xl flex rounded-3xl overflow-hidden shadow-2xl bg-white/95 backdrop-blur-xl border border-white/50 transform transition-all duration-500 hover:shadow-2xl hover:scale-[1.02] hover:border-emerald-200/50">
+      {/*sliding panel*/}
         <div className={`absolute top-0 w-1/2 h-full z-20 transition-all duration-700 ease-in-out transform ${isLogin ? 'translate-x-full' : 'translate-x-0'} ${isLogin ? 'bg-gradient-to-br from-emerald-600 via-emerald-500 to-teal-600' : 'bg-gradient-to-br from-teal-600 via-teal-500 to-emerald-600'} flex items-center justify-center text-white`}>
           <div className={`text-center px-8 transform transition-all duration-500 ${isLogin ? 'translate-x-0' : 'translate-x-0'}`}>
             {isLogin ? (
-              <div className="animate-in fade-in-0 slide-in-from-left-5 duration-500">
+              <div className="opacity-0 animate-fade-in">
                 <FiUserPlus className="w-16 h-16 mx-auto mb-4 animate-bounce" />
                 <h2 className="text-3xl font-bold mb-4">Belum Punya Akun?</h2>
                 <p className="mb-6 text-emerald-100 leading-relaxed">Silahkan melakukan registrasi dengan klik tombol di bawah ini</p>
@@ -92,7 +178,7 @@ export default function AuthForm() {
                 </button>
               </div>
             ) : (
-              <div className="animate-in fade-in-0 slide-in-from-right-5 duration-500">
+              <div className="opacity-0 animate-fade-in">
                 <FiUser className="w-16 h-16 mx-auto mb-4 animate-pulse" />
                 <h2 className="text-3xl font-bold mb-4">Selamat Datang</h2>
                 <p className="mb-6 text-teal-100 leading-relaxed">Login untuk melanjutkan booking</p>
@@ -110,7 +196,7 @@ export default function AuthForm() {
         
         <div className={`w-1/2 p-8 flex items-center justify-center transition-all duration-500 ${isLogin ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'}`}>
           {isLogin && (
-            <div className="w-full max-w-sm animate-in fade-in-0 slide-in-from-bottom-4 duration-700">
+            <div className="w-full max-w-sm opacity-0 animate-fade-in-up">
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-gray-800 mb-2">Login</h3>
                 <p className="text-gray-600">Selamat datang kembali di FutsalBook</p>
@@ -122,14 +208,14 @@ export default function AuthForm() {
               </div>
 
               {error && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center space-x-2 animate-in slide-in-from-top-2 duration-300">
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center space-x-2 animate-slide-down">
                   <FiAlertCircle className="text-red-500 animate-pulse" />
                   <span className="text-red-700 text-sm">{error}</span>
                 </div>
               )}
 
               {success && (
-                <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center space-x-2 animate-in slide-in-from-top-2 duration-300">
+                <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center space-x-2 animate-slide-down">
                   <FiCheckCircle className="text-green-500 animate-bounce" />
                   <span className="text-green-700 text-sm">{success}</span>
                 </div>
@@ -201,21 +287,21 @@ export default function AuthForm() {
 
         <div className={`w-1/2 p-8 flex items-center justify-center transition-all duration-500 ${!isLogin ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}>
           {!isLogin && (
-            <div className="w-full max-w-sm animate-in fade-in-0 slide-in-from-bottom-4 duration-700">
+            <div className="w-full max-w-sm opacity-0 animate-fade-in-up">
               <div className="text-center mb-8">
                 <h3 className="text-2xl font-bold text-gray-800 mb-2">Mendaftar</h3>
                 <p className="text-gray-600">Buat Akun FutsalBook Anda</p>
               </div>
 
               {error && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center space-x-2 animate-in slide-in-from-top-2 duration-300">
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center space-x-2 animate-slide-down">
                   <FiAlertCircle className="text-red-500 animate-pulse" />
                   <span className="text-red-700 text-sm">{error}</span>
                 </div>
               )}
 
               {success && (
-                <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center space-x-2 animate-in slide-in-from-top-2 duration-300">
+                <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center space-x-2 animate-slide-down">
                   <FiCheckCircle className="text-green-500 animate-bounce" />
                   <span className="text-green-700 text-sm">{success}</span>
                 </div>
@@ -265,6 +351,47 @@ export default function AuthForm() {
           )}
         </div>
       </div>
+      
+      <style jsx>{`
+        @keyframes fade-in {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        
+        @keyframes fade-in-up {
+          from { 
+            opacity: 0; 
+            transform: translateY(20px);
+          }
+          to { 
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes slide-down {
+          from { 
+            opacity: 0; 
+            transform: translateY(-10px);
+          }
+          to { 
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .animate-fade-in {
+          animation: fade-in 0.5s ease-out forwards;
+        }
+        
+        .animate-fade-in-up {
+          animation: fade-in-up 0.7s ease-out forwards;
+        }
+        
+        .animate-slide-down {
+          animation: slide-down 0.3s ease-out forwards;
+        }
+      `}</style>
     </div>
   )
 }

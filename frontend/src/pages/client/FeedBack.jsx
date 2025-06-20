@@ -1,4 +1,8 @@
+
 import React, { useState } from "react"
+
+// Base API URL
+const API_URL = 'http://localhost:8000/api';
 
 export default function FeedBack() {
   const [feedback, setFeedback] = useState("")
@@ -9,29 +13,80 @@ export default function FeedBack() {
   const [errors, setErrors] = useState({})
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    const newErrors = {}
-    if (!feedback.trim()) newErrors.feedback = "Feedback tidak boleh kosong"
-    if (rating === 0) newErrors.rating = "Silakan berikan rating"
+    // Reset errors
+    setErrors({});
 
-    setErrors(newErrors)
-    if (Object.keys(newErrors).length > 0) return
+    // Validasi
+    const newErrors = {};
+    if (!feedback.trim()) newErrors.feedback = "Feedback tidak boleh kosong";
+    if (rating === 0) newErrors.rating = "Silakan berikan rating";
 
-    setIsSubmitting(true)
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
 
-    setTimeout(() => {
-      setIsSubmitting(false)
-      setIsSubmitted(true)
+    setIsSubmitting(true);
 
+    try {
+      const response = await fetch(`${API_URL}/feedback`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify({
+          message: feedback,
+          rating: rating,
+        }),
+      });
+
+      if (!response.ok) {
+        // Handle HTTP errors
+        if (response.status === 404) {
+          throw new Error("Endpoint tidak ditemukan. Pastikan server berjalan di port 8000");
+        } else if (response.status === 500) {
+          throw new Error("Server error. Silakan coba lagi nanti");
+        } else {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || `HTTP Error: ${response.status}`);
+        }
+      }
+
+      const data = await response.json();
+      console.log("Feedback berhasil dikirim:", data);
+
+      setIsSubmitting(false);
+      setIsSubmitted(true);
+
+      // Reset form after 3 seconds
       setTimeout(() => {
-        setIsSubmitted(false)
-        setFeedback("")
-        setRating(0)
-        setErrors({})
-      }, 3000)
-    }, 1500)
-  }
+        setIsSubmitted(false);
+        setFeedback("");
+        setRating(0);
+        setErrors({});
+      }, 3000);
+
+    } catch (error) {
+      console.error("Error detail:", error);
+      
+      // Handle tipe error
+      let errorMessage = "Gagal mengirim feedback";
+      
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        errorMessage = "Tidak dapat terhubung ke server. Pastikan server berjalan di localhost:8000";
+      } else if (error.message.includes('CORS')) {
+        errorMessage = "CORS error. Server perlu mengizinkan request dari frontend";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setErrors({ submit: errorMessage });
+      setIsSubmitting(false);
+    }
+  };
 
   const handleRatingClick = (value) => {
     setRating(value)
