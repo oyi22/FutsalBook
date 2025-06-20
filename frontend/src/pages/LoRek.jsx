@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom";
 import { FiMail, FiLock, FiEye, FiEyeOff, FiUser, FiArrowRight, FiUserPlus, FiPhone, FiCheckCircle, FiAlertCircle } from "react-icons/fi"
@@ -23,6 +24,7 @@ const register = async (userData) => {
 
     const data = await response.json();
     return data;
+  // eslint-disable-next-line no-unused-vars
   } catch (error) {
     throw new Error('Network error occurred');
   }
@@ -42,6 +44,7 @@ const login = async (email, password) => {
 
     const data = await response.json();
     return data;
+  // eslint-disable-next-line no-unused-vars
   } catch (error) {
     throw new Error('Network error occurred');
   }  
