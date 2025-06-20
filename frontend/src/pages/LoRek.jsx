@@ -91,7 +91,7 @@ export default function AuthForm() {
         
         setSuccess("Login berhasil! Mengarahkan ke dashboard...")
         // redirect ke dashboard instead of /home
-        setTimeout(() => navigate("/user-dashboard"), 1500)
+        setTimeout(() => navigate("/home"), 1500)
       }
     } catch (err) {
       setError("Terjadi kesalahan saat login!")
