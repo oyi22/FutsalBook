@@ -15,5 +15,7 @@ class VerifyCsrfToken extends Middleware
         'api/login',
     'api/register',
     'api/feedback',
+    'api/bookings', // Assuming bookings are created via API and should not require CSRF verification
+    
     ];
 }
