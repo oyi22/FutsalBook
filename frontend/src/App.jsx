@@ -9,6 +9,7 @@ import UserDashboard from "./pages/client/UserDashboard";
 import Feedback from "./pages/client/FeedBack";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 
 const App = () => {
   const location = useLocation();
@@ -28,6 +29,7 @@ const App = () => {
           <Route path="/home" element={<Home />} />
           <Route path="/booking" element={<Booking />} />
           <Route path="/user-dashboard" element={<UserDashboard />} />
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/feedback" element={<Feedback />} />
           <Route path="/booking-history" element={<BookingHistory />} />
           <Route path="/user-profile" element={<UserProfile />} />
