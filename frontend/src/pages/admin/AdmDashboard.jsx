@@ -2,6 +2,8 @@ import React from 'react';
 import NavbarAdmin from '../../components/NavbarAdmin';
 
 const AdminDashboard = () => {
+
+  // SEMUANYA DATA DUMMY
   return (
     <div className="min-h-screen bg-gray-100">
       <NavbarAdmin />
