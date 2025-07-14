@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Calendar, Clock, Users, CreditCard, CheckCircle, ArrowRight, User, Phone, Mail } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-
+/* eslint-disable no-unused-vars */
 //ini jgnn di ganti ya
 const FIELD_DATA = [
   {
@@ -57,11 +57,13 @@ export default function Booking() {
     }
   }, [location.state, navigate]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 2000);
+    await submitBooking();
+    setIsLoading(false);
   };
+
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -70,14 +72,70 @@ export default function Booking() {
     }))
   }
 
+  const BASE_URL = 'http://localhost:8000/api';
+
+const submitBooking = async () => {
+  const payload = {
+    field_name: selectedField.name,
+    location: selectedField.location,
+    date: selectedDate,
+    start_time: selectedTime,
+    end_time: String(
+      parseInt(selectedTime.split(":")[0]) + duration
+    ).padStart(2, "0") + ":00",
+    status: "upcoming",
+    total_price: calculateTotal(),
+    name: formData.name,
+    phone: formData.phone,
+    email: formData.email,
+    notes: formData.notes,
+  };
+
+  try {
+    const response = await fetch(`${BASE_URL}/bookings`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: 'Bearer ' + localStorage.getItem('token')
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      console.error("Gagal menyimpan booking:", data);
+      alert("Gagal menyimpan booking");
+      return;
+    }
+
+    alert("Booking berhasil disimpan!");
+    navigate("/booking-history"); // atau arahkan ke halaman lain
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Terjadi kesalahan saat menyimpan booking");
+  }
+};
+
+
   const timeSlots = [
     "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", 
     "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"
   ];
 
   const calculateTotal = () => {
-    return selectedField ? selectedField.price * duration : 0;
-  }
+  return selectedField ? selectedField.price * duration : 0;
+};
+
+// Tambahan validasi form
+const isFormValid =
+  selectedDate.trim() !== "" &&
+  selectedTime.trim() !== "" &&
+  formData.name.trim() !== "" &&
+  formData.phone.trim() !== "" &&
+  formData.email.trim() !== "";
+
 
   if (!selectedField) {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
@@ -305,9 +363,10 @@ export default function Booking() {
               <button
                 type="button"
                 onClick={handleSubmit}
-                disabled={isLoading || !selectedDate || !selectedTime || !formData.name || !formData.phone || !formData.email}
+                disabled={isLoading || !isFormValid}
                 className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]"
               >
+
                 {isLoading ? (
                   <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                 ) : (

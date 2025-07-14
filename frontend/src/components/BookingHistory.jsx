@@ -12,27 +12,42 @@ import {
 } from "lucide-react"
 
 export default function BookingHistory() {
-  // State: Data
   const [bookings, setBookings] = useState([])
   const [filteredBookings, setFilteredBookings] = useState([])
 
-  // State: Filter
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
 
-  // State: UI
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Simulasi loading data
   useEffect(() => {
     const loadBookings = async () => {
       setIsLoading(true)
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      try {
+        const response = await fetch('http://localhost:8000/api/bookings', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            Authorization: 'Bearer ' + localStorage.getItem('token'),
+          },
+        })
 
-      const mockBookings = [] 
-      setBookings(mockBookings)
-      setFilteredBookings(mockBookings)
+        const data = await response.json()
+
+        if (response.ok && data.success) {
+          setBookings(data.data)
+          setFilteredBookings(data.data)
+        } else {
+          console.error('Gagal memuat data booking:', data.message)
+          alert('Gagal memuat data booking')
+        }
+      } catch (error) {
+        console.error('Error fetching bookings:', error)
+        alert('Terjadi kesalahan saat memuat booking')
+      }
+
       setIsLoading(false)
     }
 
@@ -44,7 +59,7 @@ export default function BookingHistory() {
 
     if (searchTerm) {
       filtered = filtered.filter(booking =>
-        booking.fieldName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        booking.field_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         booking.location.toLowerCase().includes(searchTerm.toLowerCase())
       )
     }
@@ -91,7 +106,6 @@ export default function BookingHistory() {
 
   const formatDate = dateString => {
     const date = new Date(dateString)
-
     return date.toLocaleDateString("id-ID", {
       weekday: "long",
       year: "numeric",
@@ -121,20 +135,16 @@ export default function BookingHistory() {
     )
   }
 
-  // UI utama 
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Riwayat Booking</h1>
           <p className="text-gray-600">Kelola dan pantau semua booking lapangan Anda</p>
         </div>
 
-        {/* Search & Filter */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-6">
           <div className="flex flex-col sm:flex-row gap-4">
-            {/* Search */}
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
@@ -146,7 +156,6 @@ export default function BookingHistory() {
               />
             </div>
 
-            {/* Filter */}
             <div className="relative">
               <button
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
@@ -193,7 +202,6 @@ export default function BookingHistory() {
           </div>
         </div>
 
-        {/* Booking List */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200">
           {filteredBookings.length === 0 ? (
             <div className="text-center py-16">
@@ -227,7 +235,7 @@ export default function BookingHistory() {
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-3">
-                        <h3 className="text-lg font-semibold text-gray-900">{booking.fieldName}</h3>
+                        <h3 className="text-lg font-semibold text-gray-900">{booking.field_name}</h3>
                         <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(booking.status)}`}>
                           {getStatusIcon(booking.status)}
                           {getStatusText(booking.status)}
@@ -246,7 +254,7 @@ export default function BookingHistory() {
                         <div className="flex items-center gap-2">
                           <Clock className="w-4 h-4 text-gray-400" />
                           <span>
-                            {formatTime(booking.startTime)} - {formatTime(booking.endTime)}
+                            {formatTime(booking.start_time)} - {formatTime(booking.end_time)}
                           </span>
                         </div>
                       </div>
@@ -254,7 +262,7 @@ export default function BookingHistory() {
 
                     <div className="flex flex-col sm:items-end gap-2">
                       <div className="text-lg font-bold text-gray-900">
-                        Rp {booking.totalPrice?.toLocaleString("id-ID")}
+                        Rp {booking.total_price?.toLocaleString("id-ID")}
                       </div>
                     </div>
                   </div>

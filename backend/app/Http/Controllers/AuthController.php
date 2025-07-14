@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -37,10 +38,8 @@ class AuthController extends Controller
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
+                'api_token' => Str::random(60), // ← tambahkan token manual
             ]);
-
-            // Buat token untuk user
-            $token = $user->createToken('auth-token')->plainTextToken;
 
             return response()->json([
                 'success' => true,
@@ -50,7 +49,7 @@ class AuthController extends Controller
                     'name' => $user->name,
                     'email' => $user->email,
                 ],
-                'token' => $token
+                'token' => $user->api_token // ← kirim token
             ], 201);
 
         } catch (\Exception $e) {
@@ -90,11 +89,11 @@ class AuthController extends Controller
                 ], 401);
             }
 
-            // Ambil user yang login
             $user = Auth::user();
-            
-            // Buat token
-            $token = $user->createToken('auth-token')->plainTextToken;
+
+            // Generate token baru
+            $user->api_token = Str::random(60);
+            $user->save();
 
             return response()->json([
                 'success' => true,
@@ -104,7 +103,7 @@ class AuthController extends Controller
                     'name' => $user->name,
                     'email' => $user->email,
                 ],
-                'token' => $token
+                'token' => $user->api_token
             ], 200);
 
         } catch (\Exception $e) {
@@ -117,13 +116,18 @@ class AuthController extends Controller
     }
 
     /**
-     * Logout user
+     * Logout user (hapus token manual)
      */
     public function logout(Request $request)
     {
         try {
-            // Hapus token saat ini
-            $request->user()->currentAccessToken()->delete();
+            $token = $request->bearerToken();
+            $user = User::where('api_token', $token)->first();
+
+            if ($user) {
+                $user->api_token = null;
+                $user->save();
+            }
 
             return response()->json([
                 'success' => true,
@@ -145,8 +149,16 @@ class AuthController extends Controller
     public function user(Request $request)
     {
         try {
-            $user = $request->user();
-            
+            $token = $request->bearerToken();
+            $user = User::where('api_token', $token)->first();
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthenticated'
+                ], 401);
+            }
+
             return response()->json([
                 'success' => true,
                 'user' => [

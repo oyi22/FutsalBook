@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 Use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\BookingController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -23,6 +24,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Route::apiResource('posts', PostController::class);
 });
 
+
 // Route untuk testing 
 Route::get('/test', function () {
     return response()->json(['message' => 'API working!', 'status' => 'OK']);
@@ -30,3 +32,9 @@ Route::get('/test', function () {
 
 //////FEEDBACK OYY
 Route::post('/feedback', [FeedbackController::class, 'store']);
+
+//BOOKING
+// Endpoint Booking
+Route::get('/bookings', [BookingController::class, 'index']);
+Route::post('/bookings', [BookingController::class, 'store']);
+Route::put('/bookings/{id}', [BookingController::class, 'update']);
